@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  simle:
+    container_name: simle
+    build:
+      context: .           # Thư mục chứa Dockerfile
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"        # Map port container ra ngoài
+    environment:
+      - NODE_ENV=production
+    restart: always
+    env_file: .env

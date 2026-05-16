@@ -1,0 +1,7 @@
+{
+  "Home": {
+    "title": "Xin chào",
+    "description": "Đây là trang chủ."
+  },
+  "ordered": "Ordered on {orderDate, date, short}"
+}

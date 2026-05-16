@@ -1,0 +1,13 @@
+{
+  "Login": {
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Remember me",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "errorRequired": "Please fill in all fields",
+    "errorFailed": "Login failed. Please try again."
+  }
+}

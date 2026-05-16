@@ -1,0 +1,7 @@
+{
+  "Home": {
+    "title": "Welcome",
+    "description": "This is the homepage."
+  },
+  "ordered": "Ordered on {orderDate, date, short}"
+}

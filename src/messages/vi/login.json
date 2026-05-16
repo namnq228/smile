@@ -1,0 +1,13 @@
+{
+  "Login": {
+    "username": "Tên đăng nhập",
+    "usernamePlaceholder": "Nhập tên tài khoản",
+    "password": "Mật khẩu",
+    "passwordPlaceholder": "Nhập mật khẩu",
+    "rememberMe": "Nhớ mật khẩu",
+    "submit": "Đăng nhập",
+    "submitting": "Đang đăng nhập...",
+    "errorRequired": "Vui lòng nhập đầy đủ thông tin",
+    "errorFailed": "Đăng nhập thất bại. Vui lòng thử lại."
+  }
+}
