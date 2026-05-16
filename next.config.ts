@@ -2,6 +2,7 @@ import { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   devIndicators: false,
   sassOptions: {
     additionalData: `$var: red;`,

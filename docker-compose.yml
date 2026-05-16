@@ -1,14 +1,17 @@
-version: '3.8'
-
 services:
-  simle:
-    container_name: simle
+  smile:
+    container_name: smile
+    # CI/CD tự cập nhật IMAGE bằng biến môi trường
+    # Mặc định build local nếu không có IMAGE
+    image: ${IMAGE:-smile:local}
     build:
-      context: .           # Thư mục chứa Dockerfile
+      context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"        # Map port container ra ngoài
+      - "${PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
-    restart: always
-    env_file: .env
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
