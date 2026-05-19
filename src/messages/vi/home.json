@@ -3,5 +3,10 @@
     "title": "Xin chào",
     "description": "Đây là trang chủ."
   },
+  "Header": {
+    "account": "Tài khoản",
+    "logout": "Đăng xuất",
+    "loggingOut": "Đang đăng xuất..."
+  },
   "ordered": "Ordered on {orderDate, date, short}"
 }

@@ -3,5 +3,10 @@
     "title": "Welcome",
     "description": "This is the homepage."
   },
+  "Header": {
+    "account": "Account",
+    "logout": "Logout",
+    "loggingOut": "Logging out..."
+  },
   "ordered": "Ordered on {orderDate, date, short}"
 }

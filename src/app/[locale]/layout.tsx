@@ -8,6 +8,8 @@ import { routing } from '@/i18n/routing'
 import { setRequestLocale } from 'next-intl/server'
 import QueryProvider from '@/libs/reactQueryClient'
 import ReduxProvider from '@/libs/ReduxProvider'
+import AuthProvider from '@/libs/AuthProvider'
+import Header from '@/components/layout/Header'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -42,7 +44,10 @@ export default async function RootLayout({ children, params }: RootLayoutProps) 
         <ReduxProvider>
           <NextIntlClientProvider>
             <QueryProvider>
-              {children}
+              <AuthProvider>
+                <Header />
+                <main>{children}</main>
+              </AuthProvider>
             </QueryProvider>
           </NextIntlClientProvider>
         </ReduxProvider>

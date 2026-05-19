@@ -1,4 +1,5 @@
 import apiClient, { ApiResponse } from '@/libs/apiClient'
+import { getToken, getRefreshToken } from '@/libs/Auth'
 
 export interface LoginRequest {
   userName: string
@@ -33,6 +34,11 @@ export interface RefreshTokenRequest {
   refreshToken: string
 }
 
+export interface LogoutRequest {
+  accessToken: string
+  refreshToken: string
+}
+
 export const authService = {
   login: (data: LoginRequest): Promise<ApiResponse<LoginResponse>> =>
     apiClient.post<LoginResponse>('/api/auth/login', data, { skipAuth: true }),
@@ -40,8 +46,13 @@ export const authService = {
   refreshToken: (data: RefreshTokenRequest): Promise<ApiResponse<LoginResponse>> =>
     apiClient.post<LoginResponse>('/api/auth/refresh-token', data, { skipAuth: true }),
 
-  logout: (): Promise<ApiResponse<void>> =>
-    apiClient.post<void>('/api/auth/logout'),
+  logout: (): Promise<ApiResponse<void>> => {
+    const payload: LogoutRequest = {
+      accessToken: getToken() ?? '',
+      refreshToken: getRefreshToken() ?? '',
+    }
+    return apiClient.post<void>('/api/auth/logout', payload, { skipAuthRedirect: true })
+  },
 
   getMe: (): Promise<ApiResponse<LoginResponse>> =>
     apiClient.get<LoginResponse>('/api/auth/me'),

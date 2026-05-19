@@ -5,6 +5,7 @@ declare module 'axios' {
   export interface AxiosRequestConfig {
     skipAuth?: boolean
     _retry?: boolean
+    skipAuthRedirect?: boolean
   }
 }
 
@@ -61,7 +62,7 @@ const createApiClient = (): AxiosInstance => {
       } else if (typeof window !== 'undefined') {
         const token = getToken()
         if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`
+          config.headers.Authorization = token
         }
       }
 
@@ -82,6 +83,12 @@ const createApiClient = (): AxiosInstance => {
         const originalConfig = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
         if (status === 401 && typeof window !== 'undefined') {
+          // Bỏ qua refresh/redirect nếu request đã đánh dấu skipAuthRedirect
+          if (originalConfig?.skipAuthRedirect) {
+            const apiResponse = error.response.data as ApiResponse
+            return Promise.reject(new ApiError(apiResponse))
+          }
+
           const refreshToken = getRefreshToken()
 
           if (!originalConfig?._retry && refreshToken) {
@@ -90,7 +97,7 @@ const createApiClient = (): AxiosInstance => {
                 failedQueue.push({ resolve, reject })
               }).then((token) => {
                 if (originalConfig.headers) {
-                  originalConfig.headers.Authorization = `Bearer ${token}`
+                  originalConfig.headers.Authorization = token
                 }
                 return instance(originalConfig)
               })
@@ -106,10 +113,10 @@ const createApiClient = (): AxiosInstance => {
                   const { accessToken, refreshToken: newRefreshToken } = res.data as { accessToken: string; refreshToken: string }
                   setToken(accessToken)
                   setRefreshToken(newRefreshToken)
-                  instance.defaults.headers.common.Authorization = `Bearer ${accessToken}`
+                  instance.defaults.headers.common.Authorization = accessToken
                   processQueue(null, accessToken)
                   if (originalConfig.headers) {
-                    originalConfig.headers.Authorization = `Bearer ${accessToken}`
+                    originalConfig.headers.Authorization = accessToken
                   }
                   resolve(instance(originalConfig))
                 })
