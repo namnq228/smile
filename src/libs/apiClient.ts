@@ -1,10 +1,22 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'
-import { getToken } from './Auth'
+import { getToken, getRefreshToken, setToken, setRefreshToken, clearAuth } from './Auth'
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
     skipAuth?: boolean
+    _retry?: boolean
   }
+}
+
+let isRefreshing = false
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: unknown) => void }> = []
+
+const processQueue = (error: unknown, token: string | null = null): void => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error)
+    else resolve(token!)
+  })
+  failedQueue = []
 }
 
 export interface ApiResponse<T = any> {
@@ -64,43 +76,72 @@ const createApiClient = (): AxiosInstance => {
     (response: AxiosResponse<ApiResponse>) => {
       return response
     },
-    (error: AxiosError) => {
-      let apiResponse: ApiResponse
-
+    async (error: AxiosError) => {
       if (error.response) {
-        apiResponse = error.response.data as ApiResponse
         const status = error.response.status
-        switch (status) {
-          case 401:
-            if (typeof window !== 'undefined') {
-              localStorage.removeItem('token')
-              sessionStorage.removeItem('token')
-              window.location.href = '/login'
+        const originalConfig = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+
+        if (status === 401 && typeof window !== 'undefined') {
+          const refreshToken = getRefreshToken()
+
+          if (!originalConfig?._retry && refreshToken) {
+            if (isRefreshing) {
+              return new Promise<string>((resolve, reject) => {
+                failedQueue.push({ resolve, reject })
+              }).then((token) => {
+                if (originalConfig.headers) {
+                  originalConfig.headers.Authorization = `Bearer ${token}`
+                }
+                return instance(originalConfig)
+              })
             }
-            break
-          case 403:
-            console.error('Access forbidden')
-            break
-          case 404:
-            console.error('Resource not found')
-            break
-          case 500:
-            console.error('Server error')
-            break
+
+            originalConfig._retry = true
+            isRefreshing = true
+
+            return new Promise((resolve, reject) => {
+              axios
+                .post('/api/auth/refresh-token', { refreshToken })
+                .then((res) => {
+                  const { accessToken, refreshToken: newRefreshToken } = res.data as { accessToken: string; refreshToken: string }
+                  setToken(accessToken)
+                  setRefreshToken(newRefreshToken)
+                  instance.defaults.headers.common.Authorization = `Bearer ${accessToken}`
+                  processQueue(null, accessToken)
+                  if (originalConfig.headers) {
+                    originalConfig.headers.Authorization = `Bearer ${accessToken}`
+                  }
+                  resolve(instance(originalConfig))
+                })
+                .catch((err) => {
+                  processQueue(err, null)
+                  clearAuth()
+                  window.location.href = '/login'
+                  reject(err)
+                })
+                .finally(() => {
+                  isRefreshing = false
+                })
+            })
+          }
+
+          clearAuth()
+          window.location.href = '/login'
+        } else if (status === 403) {
+          console.error('Access forbidden')
+        } else if (status === 404) {
+          console.error('Resource not found')
+        } else if (status === 500) {
+          console.error('Server error')
         }
-      } else if (error.request) {
-        apiResponse = {
-          data: null,
-          message: 'Network error. Please check your connection.',
-          status: 0,
-        }
-      } else {
-        apiResponse = {
-          data: null,
-          message: error.message || 'An unexpected error occurred',
-          status: undefined,
-        }
+
+        const apiResponse = error.response.data as ApiResponse
+        return Promise.reject(new ApiError(apiResponse))
       }
+
+      const apiResponse: ApiResponse = error.request
+        ? { data: null, message: 'Network error. Please check your connection.', status: 0 }
+        : { data: null, message: error.message || 'An unexpected error occurred', status: undefined }
 
       return Promise.reject(new ApiError(apiResponse))
     }

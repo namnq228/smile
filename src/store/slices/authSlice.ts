@@ -1,21 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { Permission } from '@/services/auth/authService'
 
 export interface AuthUser {
-  id: string
+  userId: string
   userName: string
-  email?: string
-  roles?: string[]
+  userRoles: string[]
+  userPermissions: Permission[]
+  userProfileImage: string
 }
 
 interface AuthState {
   user: AuthUser | null
-  token: string | null
+  accessToken: string | null
+  refreshToken: string | null
   isAuthenticated: boolean
 }
 
 const initialState: AuthState = {
   user: null,
-  token: null,
+  accessToken: null,
+  refreshToken: null,
   isAuthenticated: false,
 }
 
@@ -25,15 +29,17 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{ user: AuthUser; token: string }>
+      action: PayloadAction<{ user: AuthUser; accessToken: string; refreshToken: string }>
     ) => {
       state.user = action.payload.user
-      state.token = action.payload.token
+      state.accessToken = action.payload.accessToken
+      state.refreshToken = action.payload.refreshToken
       state.isAuthenticated = true
     },
     logout: (state) => {
       state.user = null
-      state.token = null
+      state.accessToken = null
+      state.refreshToken = null
       state.isAuthenticated = false
     },
   },
