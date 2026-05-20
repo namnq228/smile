@@ -8,5 +8,11 @@
     "logout": "Logout",
     "loggingOut": "Logging out..."
   },
+  "ErrorBoundary": {
+    "title": "Something went wrong",
+    "description": "This page encountered an unexpected error. Please try again.",
+    "retry": "Try again",
+    "goHome": "Go home"
+  },
   "ordered": "Ordered on {orderDate, date, short}"
 }

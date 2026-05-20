@@ -8,5 +8,11 @@
     "logout": "Đăng xuất",
     "loggingOut": "Đang đăng xuất..."
   },
+  "ErrorBoundary": {
+    "title": "Có lỗi xảy ra",
+    "description": "Trang này gặp sự cố không mong muốn. Vui lòng thử lại.",
+    "retry": "Thử lại",
+    "goHome": "Về trang chủ"
+  },
   "ordered": "Ordered on {orderDate, date, short}"
 }
